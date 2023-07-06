@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
+            $table->unsignedTinyInteger('seat_id');
+            $table->timestamp('reserved_at')->nullable()->default(null);
+            $table->string('finalization_email')->nullable()->default(null);
             $table->timestamps();
         });
     }
