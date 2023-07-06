@@ -1,18 +1,14 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <DatePicker/>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import DatePicker from "@/components/DatePicker.vue";
 
 export default {
   name: 'HomeView',
   components: {
-    HelloWorld
+    DatePicker,
   }
 }
 </script>
