@@ -1,5 +1,5 @@
 <template>
-  <header class=" py-3 mb-4 border-bottom">
+  <header class=" py-3 mb-5 border-bottom">
     <span id="silly-span" class="icon-class">
       <i class="bi bi-film"></i>
     </span>

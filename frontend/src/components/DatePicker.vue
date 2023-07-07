@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="mb-5">
     <div class="d-flex justify-content-center">
-      <input type="text" id="datepicker" class="form-control" placeholder="Select Date" style="display: inline;" ref="datepickerInput">
+      <input type="text" id="datepicker" class="form-control" placeholder="Select Date" style="display: inline;" ref="datepickerInput" v-model="selectedDate">
       <span class="input-group-text" id="basic-addon1" style="display: inline;" @click="handleIconClick">
         <i class="bi bi-calendar-date-fill"></i>
       </span>
@@ -14,16 +14,28 @@ export default {
   name: "DatePicker",
   mounted() {
     const datepickerInput = this.$refs.datepickerInput;
-
     flatpickr(datepickerInput, {
       minDate: 'today',
       maxDate: new Date().fp_incr(7),
     });
   },
+  data() {
+    return {
+      selectedDate: ""
+    };
+  },
+  watch: {
+    selectedDate(newDate) {
+      this.dateChanger(newDate);
+    }
+  },
   methods: {
     handleIconClick() {
       const datepickerInput = this.$refs.datepickerInput;
       datepickerInput.focus();
+    },
+    dateChanger(newDate) {
+      this.$emit("newDate", newDate);
     }
   }
 }
