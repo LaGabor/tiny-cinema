@@ -8,7 +8,7 @@
     <button type="button" class="btn-close" @click="dismissAlert" aria-label="Close"></button>
   </div>
   <div v-else-if="booked === 'timeout'" class="alert alert-warning alert-dismissible fade show" role="alert">
-    At the moment this seat reserved for this date!
+    Sorry your reservation expired try again!
     <button type="button" class="btn-close" @click="dismissAlert" aria-label="Close"></button>
   </div>
   <div v-else-if="booked === 'booked'" class="alert alert-success alert-dismissible fade show" role="alert">
