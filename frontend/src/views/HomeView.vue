@@ -1,15 +1,22 @@
 <template>
   <PayModal @pay="tryToPay"/>
-  <DatePicker @newDate="updateChosenDate"/>
+  <DatePicker @refresh="refresh" @newDate="updateChosenDate"/>
   <div class="mb-5">
     <Alert :booked="bookedAlert" @dismissAlert="dismissAlert"/>
     <div v-if="seatsReservationStatus === null">
       <p class=" d-flex justify-content-center">Choose a Date!</p>
     </div>
+    <div v-else-if="seatsReservationStatus === false" class="spinner-border text-primary" role="status">
+      <span class="sr-only"></span>
+    </div>
     <div v-else>
-        <SettingSeats :seats="seatsReservationStatus" @reserve="tryToReserve"/>
-      <button v-if="seatsReservedByUser[0] || seatsReservedByUser[1] !== false" type="button" class="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#payModal" >Pay</button>
-      <button v-else type="button" class="btn btn-primary mt-5 disabled">Pay</button>
+        <SettingSeats :seats="seats" :reservationsStatus="seatsReservationStatus" @reserve="tryToReserve"/>
+      <button v-if="seatsReservedByUser[0] === false && seatsReservedByUser[1] === false" type="button" class="btn btn-primary mt-5 disabled">Pay</button>
+      <button v-else-if="finalizationAtTheMoment === false" type="button" class="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#payModal" >Pay</button>
+      <button v-else class="btn btn-primary mt-5 disabled" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Loading...
+      </button>
     </div>
   </div>
 
@@ -36,13 +43,16 @@ export default {
       seatsReservationStatus: null,
       bookedAlert: null,
       seatsReservedByUser: [false,false],
+      finalizationAtTheMoment :false,
+      seats: null
     };
   },
   methods: {
       updateChosenDate(newDate){
         this.chosenDate = newDate
+        this.seatsReservationStatus = false
         this.seatsReservedByUser = [false,false]
-        this.getSeatsByDate(this.chosenDate)
+        this.getSeatsByDate()
         this.bookedAlert = null;
       },
       async tryToReserve(seatData){
@@ -60,15 +70,17 @@ export default {
         return await fetchUrl.post("http://localhost:8000/api/seat/reserve", { date: this.chosenDate,seatId:seatId});
       },
       async getSeatsByDate(){
-        this.seatsReservationStatus = await fetchUrl.get("http://localhost:8000/api/seats/date", { date: this.chosenDate });
-      },
+        let result = await fetchUrl.get("http://localhost:8000/api/seats/date", { date: this.chosenDate });
+        this.seatsReservationStatus = result['reservationsStatus'];
+        this.seats = result['seats'];
+        },
       dismissAlert() {
         this.bookedAlert = null;
       },
       async tryToPay(email){
         let seatsId =  this.convertIsReservedIntoIds(this.seatsReservedByUser);
+        this.finalizationAtTheMoment = true;
         let result = await fetchUrl.put("http://localhost:8000/api/seats/buy", {date: this.chosenDate,seatsId:seatsId,email:email});
-        console.log(result)
         this.afterPayAttempt(result);
         },
       convertIsReservedIntoIds(reservationList){
@@ -82,21 +94,27 @@ export default {
         return SeatsReservedById;
       },
       afterPayAttempt(result){
-        console.log(result)
-        if(result === 1){
+        if(result['booked'] === true){
           this.bookedAlert = 'booked';
           this.reservationSold();
         }else{
           this.bookedAlert = 'timeout'
+          this.seatsReservationStatus = result['reservationsStatus'];
         }
-        this.seatsReservedByUser = [false,false]
+        this.finalizationAtTheMoment = false;
       },
     reservationSold() {
       this.seatsReservedByUser.forEach((reservationStatus,index) =>{
           if(reservationStatus === true){
            this.seatsReservationStatus[index] = 'sold';
+           this.seatsReservedByUser = [false,false]
           }
       })
+    },
+    refresh(){
+        if(this.chosenDate !== null){
+          this.getSeatsByDate()
+        }
     }
   }
 
