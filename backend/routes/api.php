@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/seats/date',[ReservationController::class,'getSeatsByDate']);
+Route::get('/seats/date',[ReservationController::class, 'getReservationsByDate']);
 Route::post('/seat/reserve',[ReservationController::class,'reserveSeat']);
 Route::put('/seats/buy',[ReservationController::class,'buySeats']);
 
