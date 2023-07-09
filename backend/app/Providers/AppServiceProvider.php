@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\MailController;
+use App\Models\Seat;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +14,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(MailController::class, function ($app) {
+            return new MailController();
+        });
     }
 
     /**
@@ -19,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        date_default_timezone_set('Europe/Budapest');
+        Schema::defaultStringLength(191);
     }
 }
