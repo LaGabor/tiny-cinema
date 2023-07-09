@@ -1,7 +1,6 @@
 <template>
   <ul class="list-group">
-    <Seat :seatNum="seat1" :seatsStatus="seats" @reserve="reserveSeat"/>
-    <Seat :seatNum="seat2" :seatsStatus="seats" @reserve="reserveSeat"/>
+    <Seat v-for="seat in seats" :seatId="seat.id" :seatsStatus="reservationsStatus" @reserve="reserveSeat"/>
   </ul>
 </template>
 
@@ -11,13 +10,7 @@ import Seat from "@/components/Seat.vue";
 export default {
   name: "SettingSeats",
   components: {Seat},
-  props: ["seats"],
-  data(){
-    return{
-      seat1:0,
-      seat2:1,
-    }
-  },
+  props: ["seats","reservationsStatus"],
   methods:{
     reserveSeat(seatData){
       this.$emit("reserve", seatData);

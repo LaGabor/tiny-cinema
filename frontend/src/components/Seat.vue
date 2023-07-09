@@ -12,7 +12,7 @@
 <script>
 export default {
   name: "Seat",
-  props:["seatNum","seatsStatus"],
+  props:["seatId","seatsStatus"],
   methods: {
     reserveSeat() {
       this.$emit("reserve", {"seatId":this.seatId,"seatNum":this.seatNum});
@@ -20,12 +20,14 @@ export default {
   },
   data(){
     return{
-      seatId: this.seatNum+1,
+      seatNum: this.seatId-1,
     }
   }
 }
 </script>
 
 <style scoped>
+
+
 
 </style>
