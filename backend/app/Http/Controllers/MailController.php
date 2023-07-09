@@ -1,11 +1,10 @@
 <?php
-//1025
 namespace App\Http\Controllers;
 
 use App\Mail\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Mockery\Exception;
+use Exception;
 
 class MailController extends Controller
 {

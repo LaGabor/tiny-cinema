@@ -6,50 +6,62 @@ use App\Models\QueryRepositories\ReservationRepository;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReservationController extends Controller
 {
 
-    function getSeatsByDate(Request $request):array{
-
-        $seats = ReservationRepository::getReservationsByDate($request->date);
-        return $this->seatsStatusByDateResult($seats);
-
+    function getReservationsByDate(Request $request, SeatController $seatController): Response
+    {
+        $reservations = ReservationRepository::getReservationsByDate($request->date);
+        $reservationsStatus = $this->seatsStatusByDateResult($reservations);
+        $seats = $seatController->getAllSeats();
+        return response(['reservationsStatus'=>$reservationsStatus,'seats'=>$seats], 200);
     }
 
-    function reserveSeat(Request $request){
-        $seat = ReservationRepository::getReservationByDateAndId($request->date,$request->seatId);
-        return $this->seatStatusByDateAndId($seat,$request->date,$request->seatId);
-
+    function reserveSeat(Request $request): Response
+    {
+        if(!$this->checkWithinWeek($request->date)){
+            return response(['message' => ["Date error!"]],Response::HTTP_CONFLICT);
+        }
+        $reservations = ReservationRepository::getReservationByDateAndId($request->date,$request->seatId);
+        $reservationStatuses = $this->seatStatusByDateAndId($reservations,$request->date,$request->seatId);
+        return response($reservationStatuses, 200);
     }
 
-    function buySeats(Request $request,MailController $mailController): bool
+    function buySeats(Request $request,MailController $mailController): Response
     {
         $reservations = ReservationRepository::getOngoingReservations($request->date,$request->seatsId);
+        if($reservations === null){
+            response(['message' => ["Invalid booking attempt!"]], Response::HTTP_CONFLICT);
+        }
         if($this->bookSeats($reservations)){
             if($mailController->sendMail($request->date,$request->seatsId,$request->email)){
                 ReservationRepository::finalizeReservation($reservations,$request->email);
-                return true;
+                return response(['booked'=>true], 200);
             }
-            return false;
+            return response(['message' => ["Email error!"]], Response::HTTP_CONFLICT);
         };
-        return false;
+        $reservationsByDate = ReservationRepository::getReservationsByDate($request->date);
+        $reservationsStatus = $this->seatsStatusByDateResult($reservationsByDate);
+        return response(['booked'=>false,'reservationsStatus'=>$reservationsStatus], 200);
     }
 
 
-    private function seatsStatusByDateResult($reservations){
+    private function seatsStatusByDateResult($reservations): array
+    {
         $seatsStatus = ['free','free'];
         if($reservations === null) return $seatsStatus;
         foreach($reservations as $reservation){
             if($reservation->finalization_email != null){
                 $seatsStatus[$reservation->seat_id-1] = 'sold';
-            }elseif ($this->secondsChecker($reservation->reserved_at)){
+            }elseif ($this->lessThanTwoMinutes($reservation->reserved_at)){
                 $seatsStatus[$reservation->seat_id-1] = 'reserved';
             }
         }
         return $seatsStatus;
     }
-    private function secondsChecker($reservationTime): bool
+    private function lessThanTwoMinutes($reservationTime): bool
     {
         $reservationDateTime = new DateTime($reservationTime);
         $now = new DateTime();
@@ -71,7 +83,7 @@ class ReservationController extends Controller
             return 'success';
         }
         if($reservation->finalization_email != null) return 'sold';
-        if($this->secondsChecker($reservation->reserved_at)){
+        if($this->lessThanTwoMinutes($reservation->reserved_at)){
             return 'reserved';
         }
         $this->updateFreeReservation($reservation);
@@ -90,19 +102,22 @@ class ReservationController extends Controller
 
     private function bookSeats($reservations)
     {
-        if($reservations === null){
-            return false;
-        }else{
-            foreach ($reservations as $reservation){
-                if ($reservation->finalization_email != null){
-                    return false;
-                }
-                if(!($this->secondsChecker($reservation->reserved_at))){
-                    return false;
-                }
+        foreach ($reservations as $reservation){
+            if ($reservation->finalization_email != null){
+                return false;
+            }
+            if(!($this->lessThanTwoMinutes($reservation->reserved_at))){
+                return false;
             }
         }
-                return true;
+        return true;
+    }
+
+    function checkWithinWeek($date):bool{
+        $inputDate = strtotime($date);
+        $currentDate = strtotime('today');
+        $weekLater = strtotime("+1 week", $currentDate);
+        return ($inputDate >= $currentDate && $inputDate <= $weekLater);
     }
 
 
