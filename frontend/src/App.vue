@@ -29,6 +29,10 @@ export default {
   font-size: 150%;
 }
 
+.btn{
+  min-width: 2.5cm;
+}
+
 
 
 </style>
