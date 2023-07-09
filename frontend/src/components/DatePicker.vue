@@ -1,14 +1,16 @@
 <template>
   <div class="mb-5">
     <div class="d-flex justify-content-center">
+      <span class="input-group-text" id="basic-addon1" style="display: inline;" @click="refreshDateReserveStatus">
+        <i class="bi bi-bootstrap-reboot"></i>
+      </span>
       <input type="text" id="datepicker" class="form-control" placeholder="Select Date" style="display: inline;" ref="datepickerInput" v-model="selectedDate">
-      <span class="input-group-text" id="basic-addon1" style="display: inline;" @click="handleIconClick">
+      <span class="input-group-text" id="basic-addon1" style="display: inline;" @click="chooseDate">
         <i class="bi bi-calendar-date-fill"></i>
       </span>
     </div>
   </div>
 </template>
-
 <script>
 export default {
   name: "DatePicker",
@@ -30,12 +32,15 @@ export default {
     }
   },
   methods: {
-    handleIconClick() {
+    chooseDate() {
       const datepickerInput = this.$refs.datepickerInput;
       datepickerInput.focus();
     },
     dateChanger(newDate) {
       this.$emit("newDate", newDate);
+    },
+    refreshDateReserveStatus(){
+      this.$emit('refresh')
     }
   }
 }
