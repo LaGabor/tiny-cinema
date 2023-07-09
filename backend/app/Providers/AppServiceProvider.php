@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Http\Controllers\MailController;
+use App\Http\Controllers\SeatController;
 use App\Models\Seat;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -16,6 +17,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(MailController::class, function ($app) {
             return new MailController();
+        });
+        $this->app->bind(SeatController::class, function ($app) {
+            return new SeatController();
         });
     }
 
