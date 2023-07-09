@@ -19,8 +19,8 @@ export default {
     }
   },
   methods:{
-    reserveSeat(seatNum){
-      this.$emit("reserve", seatNum);
+    reserveSeat(seatData){
+      this.$emit("reserve", seatData);
     }
   }
 }

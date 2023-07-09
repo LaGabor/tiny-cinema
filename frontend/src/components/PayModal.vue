@@ -14,8 +14,8 @@
               <input type="email" class="form-control" placeholder="sample@samplemail.com" id="paymail" v-model="email" required>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="cancel">Close</button>
-              <button type="submit" class="btn btn-success">Pay</button>
+              <button type="button" id='cancelButton' class="btn btn-danger" data-bs-dismiss="modal" @click="cancel">Close</button>
+              <button type="submit" class="btn btn-success" @click="pay">Pay</button>
             </div>
           </form>
         </div>
@@ -27,7 +27,6 @@
 <script>
 export default {
   name: "PayModal",
-
   data() {
     return {
       email: ''
@@ -35,10 +34,23 @@ export default {
   },
   methods: {
     pay() {
-        console.log("Form submitted:", this.email);
+      if(this.isValidEmail()){
+        let email = this.email;
+        this.$emit("pay", email);
+        this.closeModal();
+      }
+    },
+    isValidEmail() {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(this.email);
     },
     cancel(){
       this.email = '';
+    },
+    closeModal() {
+      const cancelButton = document.getElementById('cancelButton');
+      const event = new MouseEvent('click');
+      cancelButton.dispatchEvent(event);
     }
   }
 }
@@ -51,3 +63,9 @@ export default {
 }
 
 </style>
+
+
+
+
+
+
