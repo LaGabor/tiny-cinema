@@ -11,7 +11,7 @@ class Reservation extends Model
     use HasFactory;
 
 
-    protected $fillable = ['seat_id', 'reserved_at', 'finalization_email'];
+    protected $fillable = ['seat_id', 'reserved_at', 'finalization_email','reservation_day'];
 
     public function seat(): BelongsTo
     {
